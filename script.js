@@ -1,68 +1,60 @@
-// Built-in currency list with full names
 const currencies = {
-    "USD": "US Dollar",
-    "EUR": "Euro",
-    "BRL": "Brazilian Real",
-    "GBP": "British Pound",
-    "JPY": "Japanese Yen",
-    "AUD": "Australian Dollar",
-    "CAD": "Canadian Dollar",
-    "CHF": "Swiss Franc",
-    "CNY": "Chinese Yuan",
-    "RUB": "Russian Ruble",
-    "UAH": "Ukrainian Hryvnia",
-    "PLN": "Polish Zloty",
-    "MXN": "Mexican Peso",
-    "ARS": "Argentine Peso",
-    "CLP": "Chilean Peso",
-    "ZAR": "South African Rand",
-    "NZD": "New Zealand Dollar",
-    "INR": "Indian Rupee",
-    "KRW": "South Korean Won",
-    "SEK": "Swedish Krona",
-    "NOK": "Norwegian Krone",
-    "DKK": "Danish Krone",
-    "TRY": "Turkish Lira"
+  "USD": "US Dollar",
+  "EUR": "Euro",
+  "BRL": "Brazilian Real",
+  "UAH": "Ukrainian Hryvnia",
+  "JPY": "Japanese Yen",
+  "GBP": "British Pound"
 };
 
-// Populate selects
 const fromSelect = document.getElementById("fromCurrency");
 const toSelect = document.getElementById("toCurrency");
+const btn = document.getElementById("convertBtn");
+const resultBox = document.getElementById("resultBox");
+const resultP = document.getElementById("result");
 
+// Populate dropdowns
 for (const code in currencies) {
-    const option1 = document.createElement("option");
-    option1.value = code;
-    option1.textContent = `${code} — ${currencies[code]}`;
+  const opt1 = document.createElement("option");
+  opt1.value = code;
+  opt1.textContent = `${code} — ${currencies[code]}`;
+  fromSelect.appendChild(opt1);
 
-    const option2 = option1.cloneNode(true);
-
-    fromSelect.appendChild(option1);
-    toSelect.appendChild(option2);
+  const opt2 = opt1.cloneNode(true);
+  toSelect.appendChild(opt2);
 }
 
-// Default values
 fromSelect.value = "USD";
 toSelect.value = "BRL";
 
-// Convert
-document.getElementById("convertBtn").addEventListener("click", async () => {
-    const amount = parseFloat(document.getElementById("amount").value);
-    const from = fromSelect.value;
-    const to = toSelect.value;
+// Convert button
+btn.addEventListener("click", async () => {
+  const amount = parseFloat(document.getElementById("amount").value);
+  const from = fromSelect.value;
+  const to = toSelect.value;
 
-    if (isNaN(amount) || amount <= 0) {
-        alert("Enter a valid amount");
-        return;
-    }
+  if (!amount || amount <= 0) {
+    alert("Enter a valid amount");
+    return;
+  }
 
-    // Fetch exchange rate
-    const res = await fetch(`https://api.exchangerate.host/convert?from=${from}&to=${to}`);
+  try {
+    const res = await fetch(
+      `https://api.exchangerate.host/convert?from=${from}&to=${to}&amount=${amount}`
+    );
     const data = await res.json();
 
-    const result = amount * data.info.rate;
+    // The correct field is: data.result
+    if (data.result == null) {
+      resultP.textContent = "Conversion failed.";
+    } else {
+      resultP.innerHTML = `${amount} ${from} = <strong>${data.result.toFixed(2)} ${to}</strong>`;
+    }
 
-    document.getElementById("result").innerHTML =
-        `${amount} ${from} = <strong>${result.toFixed(2)} ${to}</strong>`;
+    resultBox.classList.remove("hidden");
 
-    document.getElementById("resultBox").classList.remove("hidden");
+  } catch (err) {
+    alert("Network or API error.");
+    console.error(err);
+  }
 });
