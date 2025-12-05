@@ -1,19 +1,25 @@
+// Currency list
 const currencies = {
   "USD": "US Dollar",
   "EUR": "Euro",
   "BRL": "Brazilian Real",
   "UAH": "Ukrainian Hryvnia",
   "JPY": "Japanese Yen",
-  "GBP": "British Pound"
+  "GBP": "British Pound",
+  "CAD": "Canadian Dollar",
+  "AUD": "Australian Dollar",
+  "CHF": "Swiss Franc",
+  "CNY": "Chinese Yuan",
+  "RUB": "Russian Ruble",
 };
 
+// Elements
 const fromSelect = document.getElementById("fromCurrency");
 const toSelect = document.getElementById("toCurrency");
-const btn = document.getElementById("convertBtn");
 const resultBox = document.getElementById("resultBox");
-const resultP = document.getElementById("result");
+const result = document.getElementById("result");
 
-// Populate dropdowns
+// Fill dropdowns
 for (const code in currencies) {
   const opt1 = document.createElement("option");
   opt1.value = code;
@@ -24,37 +30,47 @@ for (const code in currencies) {
   toSelect.appendChild(opt2);
 }
 
-fromSelect.value = "USD";
-toSelect.value = "BRL";
+// Default values
+fromSelect.value = "BRL";
+toSelect.value = "UAH";
 
-// Convert button
-btn.addEventListener("click", async () => {
+document.getElementById("convertBtn").addEventListener("click", async () => {
   const amount = parseFloat(document.getElementById("amount").value);
   const from = fromSelect.value;
   const to = toSelect.value;
 
-  if (!amount || amount <= 0) {
-    alert("Enter a valid amount");
+  if (isNaN(amount) || amount <= 0) {
+    alert("Enter a valid number.");
     return;
   }
 
   try {
+    // Fetch conversion from API
     const res = await fetch(
       `https://api.exchangerate.host/convert?from=${from}&to=${to}&amount=${amount}`
     );
-    const data = await res.json();
 
-    // The correct field is: data.result
-    if (data.result == null) {
-      resultP.textContent = "Conversion failed.";
-    } else {
-      resultP.innerHTML = `${amount} ${from} = <strong>${data.result.toFixed(2)} ${to}</strong>`;
+    const data = await res.json();
+    console.log("API Response:", data); // useful for debugging
+
+    // If API failed
+    if (!data || !data.result && data.result !== 0) {
+      result.innerHTML = "❌ Conversion failed (API returned no result)";
+      resultBox.classList.remove("hidden");
+      return;
     }
+
+    // SUCCESS — Show result
+    result.innerHTML = `
+      ${amount} ${from} = 
+      <strong>${data.result.toFixed(2)} ${to}</strong>
+    `;
 
     resultBox.classList.remove("hidden");
 
   } catch (err) {
-    alert("Network or API error.");
     console.error(err);
+    result.innerHTML = "❌ Error connecting to API.";
+    resultBox.classList.remove("hidden");
   }
 });
