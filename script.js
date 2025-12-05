@@ -10,27 +10,24 @@ const currencies = {
   "AUD": "Australian Dollar",
   "CHF": "Swiss Franc",
   "CNY": "Chinese Yuan",
-  "RUB": "Russian Ruble",
 };
 
-// Elements
+// Fill dropdowns
 const fromSelect = document.getElementById("fromCurrency");
 const toSelect = document.getElementById("toCurrency");
 const resultBox = document.getElementById("resultBox");
 const result = document.getElementById("result");
 
-// Fill dropdowns
 for (const code in currencies) {
-  const opt1 = document.createElement("option");
-  opt1.value = code;
-  opt1.textContent = `${code} — ${currencies[code]}`;
-  fromSelect.appendChild(opt1);
+  const o1 = document.createElement("option");
+  o1.value = code;
+  o1.textContent = `${code} — ${currencies[code]}`;
+  fromSelect.appendChild(o1);
 
-  const opt2 = opt1.cloneNode(true);
-  toSelect.appendChild(opt2);
+  const o2 = o1.cloneNode(true);
+  toSelect.appendChild(o2);
 }
 
-// Default values
 fromSelect.value = "BRL";
 toSelect.value = "UAH";
 
@@ -39,38 +36,33 @@ document.getElementById("convertBtn").addEventListener("click", async () => {
   const from = fromSelect.value;
   const to = toSelect.value;
 
-  if (isNaN(amount) || amount <= 0) {
-    alert("Enter a valid number.");
+  if (!amount || amount <= 0) {
+    alert("Enter a valid number");
     return;
   }
 
   try {
-    // Fetch conversion from API
-    const res = await fetch(
-      `https://api.exchangerate.host/convert?from=${from}&to=${to}&amount=${amount}`
-    );
-
+    // NEW WORKING API (Frankfurter)
+    const url = `https://api.frankfurter.app/latest?amount=${amount}&from=${from}&to=${to}`;
+    const res = await fetch(url);
     const data = await res.json();
-    console.log("API Response:", data); // useful for debugging
 
-    // If API failed
-    if (!data || !data.result && data.result !== 0) {
-      result.innerHTML = "❌ Conversion failed (API returned no result)";
+    console.log(data);
+
+    if (!data.rates || !data.rates[to]) {
+      result.innerHTML = "❌ Conversion not available";
       resultBox.classList.remove("hidden");
       return;
     }
 
-    // SUCCESS — Show result
-    result.innerHTML = `
-      ${amount} ${from} = 
-      <strong>${data.result.toFixed(2)} ${to}</strong>
-    `;
+    const converted = data.rates[to];
 
+    result.innerHTML = `${amount} ${from} = <strong>${converted.toFixed(2)} ${to}</strong>`;
     resultBox.classList.remove("hidden");
 
   } catch (err) {
     console.error(err);
-    result.innerHTML = "❌ Error connecting to API.";
+    result.innerHTML = "❌ Error contacting API";
     resultBox.classList.remove("hidden");
   }
 });
