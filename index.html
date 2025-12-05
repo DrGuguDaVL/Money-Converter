@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Currency Converter</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="card">
+    <h1>Currency Converter</h1>
+    <p class="lead">Convert between currencies using live exchange rates.</p>
+
+    <div class="grid">
+      <div class="field">
+        <label for="amount">Amount</label>
+        <input id="amount" type="number" value="1" min="0" />
+      </div>
+
+      <div class="field">
+        <label for="base">From</label>
+        <select id="base"></select>
+      </div>
+
+      <div class="field">
+        <label for="target">To</label>
+        <select id="target"></select>
+      </div>
+
+      <div class="field btn-col">
+        <div class="row">
+          <button id="convert">Convert</button>
+          <div id="swap" class="swap">↺</div>
+          <button id="reverse" class="ghost">Reverse</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="result" class="result" style="display:none">
+      <div id="converted"></div>
+      <div id="rateInfo" class="muted"></div>
+    </div>
+
+    <div id="error" class="error" style="display:none"></div>
+    <footer>
+      <span class="muted">Powered by exchangerate.host</span>
+      <span id="cacheNote" class="muted"></span>
+    </footer>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
